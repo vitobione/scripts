@@ -8,23 +8,17 @@ def merge_csvs(folder_path, output_file):
         return
 
     dfs = []
-    common_columns = None
+    common_columns = []
 
     for file in files:
         file_path = os.path.join(folder_path, file)
         df = pd.read_csv(file_path)
 
-        if common_columns is None:
-            common_columns = df.columns.tolist()
-        else:
-            df = df.reindex(columns=common_columns)
-
         for column in df.columns:
             if column not in common_columns:
                 common_columns.append(column)
 
-        df = df.replace('\r?\n', '; ', regex=True)  # Replace newline characters
-
+        df = df.reindex(columns=common_columns)
         df['Source'] = file
         dfs.append(df)
 
