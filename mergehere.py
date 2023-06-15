@@ -23,6 +23,8 @@ def merge_csvs(folder_path, output_file):
             if column not in common_columns:
                 common_columns.append(column)
 
+        df = df.replace('\r?\n', '; ', regex=True)  # Replace newline characters
+
         df['Source'] = file
         dfs.append(df)
 
