@@ -2,26 +2,34 @@ import os
 import pandas as pd
 
 def merge_csvs(folder_path, output_file):
-    files = [file for file in os.listdir(folder_path) if file.endswith(".csv")]
-    if not files:
+    # Use pathlib module for working with file paths
+    from pathlib import Path
+    
+    # Use glob to find CSV files
+    csv_files = Path(folder_path).glob('*.csv')
+    csv_files = list(csv_files)  # Convert generator to a list
+    
+    if not csv_files:
         print("No CSVs in this folder 🤨")
         return
-
+    
     dfs = []
-    common_columns = []
-
-    for file in files:
-        file_path = os.path.join(folder_path, file)
-        df = pd.read_csv(file_path)
-
-        for column in df.columns:
-            if column not in common_columns:
-                common_columns.append(column)
-
+    common_columns = set()  # Use set for faster lookup
+    
+    for csv_file in csv_files:
+        df = pd.read_csv(csv_file)
+        
+        # Update common_columns using set operations
+        common_columns.update(df.columns)
+        
+        # Reindex the DataFrame with common columns
         df = df.reindex(columns=common_columns)
-        df['Source'] = file
+        
+        # Add 'Source' column with file name
+        df['Source'] = csv_file.name
+        
         dfs.append(df)
-
+    
     merged_df = pd.concat(dfs, ignore_index=True)
     merged_df.to_csv(output_file, index=False)
     print(f"CSVs have been merged and saved to '{output_file}' 🤗")
