@@ -17,19 +17,14 @@ def merge_csvs(folder_path, output_file):
         if common_columns is None:
             common_columns = df.columns.tolist()
         else:
-            # Check if the columns are matching
-            if df.columns.tolist() != common_columns:
-                print(f"Columns in '{file}' don't match the rest 😐")
-                continue
+            df = df.reindex(columns=common_columns)
 
-        # Add a new column with source CSV
+        for column in df.columns:
+            if column not in common_columns:
+                common_columns.append(column)
+
         df['Source'] = file
-
         dfs.append(df)
-
-    if not dfs:
-        print("No CSVs with matching columns found 😵")
-        return
 
     merged_df = pd.concat(dfs, ignore_index=True)
     merged_df.to_csv(output_file, index=False)
